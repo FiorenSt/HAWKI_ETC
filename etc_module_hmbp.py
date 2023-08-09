@@ -12,25 +12,25 @@ class HAWKI_ETC:
     This class provides methods to compute various noise components, signal-to-noise ratio,
     and plots the SNR as a function of brightness.
     """
-    def __init__(self, exposure_time=3600 * u.s, airmass=2.0, pwv=5.0, seeing=0.8 * u.arcsec,
-                 obstruction_factor=1, reflectance_factor=1):
+    def __init__(self, DIT=60, NDIT=60 , airmass=2.0, pwv=5.0, seeing=0.8 * u.arcsec):
         """
         Initializes the HAWKI_ETC with given parameters or defaults.
-        :param exposure_time: Exposure time in seconds.
+        :param DIT: Detector Integration Time in seconds.
+        :param NDIT: Number of DITs.
         :param airmass: Airmass value.
         :param pwv: Precipitable Water Vapor.
         :param seeing: Seeing in arcseconds.
         """
-        self.exposure_time = exposure_time
+
+        self.DIT = DIT
+        self.NDIT = NDIT
+        self.exposure_time = self.DIT * self.NDIT * u.s
         self.airmass = airmass
         self.pwv = pwv
         self.seeing = seeing
         # Telescope parameters
         self.telescope_size = np.pi * (4 * u.m) ** 2
-        self.obstruction_factor = obstruction_factor # set to 1 due to no better feeling on it for HAWK
-        self.reflectance_factor = reflectance_factor # set to 1
-        self.efficiency_factor = self.obstruction_factor * self.reflectance_factor
-        self.collection_area = self.telescope_size * self.efficiency_factor
+        self.collection_area = self.telescope_size # assumes perfect efficiency
         self.quantum_efficiency = 0.9 * (u.electron / u.ph) # approximation based on plots in the user manual
         self.pixel_scale = 0.106 * u.arcsec / u.pixel
         self.aper = np.pi * self.seeing ** 2.0 # simplified, just based on seeing (0.8'' as given by the calculator)
@@ -134,7 +134,7 @@ class HAWKI_ETC:
 
         return mag
 
-    def plot(self, snr=None, savefig=False, filename="etc.png"):
+    def plot(self, snr=None, savefig=False, filename="snr_vs_mag.png"):
         """
         Plots the SNR as a function of star brightness.
 
